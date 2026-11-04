@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Import Discogs{% endblock %}
+{% block content %}
+<div class="import-page"><h1>Importer depuis Discogs</h1>
+<p>Cette opération peut prendre plusieurs minutes avec 1000+ références (rate limiting Discogs).</p>
+<div class="import-form"><label>Username Discogs<input type="text" id="discogs-username" placeholder="ton_username"></label>
+<button class="btn btn-primary" onclick="startImport()">Lancer l'import</button></div>
+<div id="import-progress" class="hidden"><div class="progress-bar"><div id="progress-fill"></div></div><p id="progress-text">En cours...</p></div>
+</div>
+<script>
+async function startImport(){const u=document.getElementById('discogs-username').value.trim();if(!u)return alert("Entre ton username Discogs");document.getElementById('import-progress').classList.remove('hidden');document.getElementById('progress-text').textContent="Import en cours... ne ferme pas cette page.";const res=await fetch(`/import/discogs/${u}`,{method:'POST'});const data=await res.json();document.getElementById('progress-text').textContent=`✅ Import terminé : ${data.imported} nouveaux supports (${data.skipped} déjà présents).`;}
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Collection - CD Manager{% endblock %}
+{% block content %}
+<div class="collection-page">
+<div class="filters" id="collection-filters">
+    <input type="text" name="q" placeholder="Recherche globale (titre, artiste, label...)"
+           hx-get="/collection" hx-trigger="keyup changed delay:300ms"
+           hx-target="#collection-results" hx-push-url="true" hx-include="#collection-filters"
+           value="{{ query or '' }}">
+    <input type="text" name="artist_q" placeholder="Filtrer par artiste..."
+           hx-get="/collection" hx-trigger="keyup changed delay:300ms"
+           hx-target="#collection-results" hx-push-url="true" hx-include="#collection-filters"
+           value="{{ artist_q or '' }}">
+    <select name="artist" hx-get="/collection" hx-trigger="change"
+            hx-target="#collection-results" hx-push-url="true" hx-include="#collection-filters">
+        <option value="">Tous les artistes</option>
+        {% for a in artists %}<option value="{{ a }}" {% if artist_filter==a %}selected{% endif %}>{{ a }}</option>{% endfor %}
+    </select>
+    <select name="format" hx-get="/collection" hx-trigger="change"
+            hx-target="#collection-results" hx-push-url="true" hx-include="#collection-filters">
+        <option value="">Tous formats</option>
+        <option value="CD" {% if format_filter=='CD' %}selected{% endif %}>CD</option>
+        <option value="Vinyle" {% if format_filter=='Vinyle' %}selected{% endif %}>Vinyle</option>
+        <option value="Cassette" {% if format_filter=='Cassette' %}selected{% endif %}>K7</option>
+        <option value="MiniDisc" {% if format_filter=='MiniDisc' %}selected{% endif %}>MiniDisc</option>
+    </select>
+    <select name="genre" hx-get="/collection" hx-trigger="change"
+            hx-target="#collection-results" hx-push-url="true" hx-include="#collection-filters">
+        <option value="">Tous genres</option>
+        {% for g in genres %}<option value="{{ g }}" {% if genre_filter==g %}selected{% endif %}>{{ g }}</option>{% endfor %}
+    </select>
+    <select name="sort" hx-get="/collection" hx-trigger="change"
+            hx-target="#collection-results" hx-push-url="true" hx-include="#collection-filters">
+        <option value="date_desc" {% if sort=='date_desc' %}selected{% endif %}>Plus récents</option>
+        <option value="artist_asc" {% if sort=='artist_asc' %}selected{% endif %}>Artiste A-Z</option>
+        <option value="artist_desc" {% if sort=='artist_desc' %}selected{% endif %}>Artiste Z-A</option>
+        <option value="title_asc" {% if sort=='title_asc' %}selected{% endif %}>Titre A-Z</option>
+        <option value="title_desc" {% if sort=='title_desc' %}selected{% endif %}>Titre Z-A</option>
+        <option value="year_desc" {% if sort=='year_desc' %}selected{% endif %}>Année ↓</option>
+        <option value="year_asc" {% if sort=='year_asc' %}selected{% endif %}>Année ↑</option>
+    </select>
+    <select name="per_page" hx-get="/collection" hx-trigger="change"
+            hx-target="#collection-results" hx-push-url="true" hx-include="#collection-filters">
+        <option value="24" {% if per_page==24 %}selected{% endif %}>24/page</option>
+        <option value="48" {% if per_page==48 %}selected{% endif %}>48/page</option>
+        <option value="96" {% if per_page==96 %}selected{% endif %}>96/page</option>
+        <option value="192" {% if per_page==192 %}selected{% endif %}>192/page</option>
+    </select>
+</div>
+<div id="collection-results">{% include "partials/collection_grid.html" %}</div>
+</div>
+{% endblock %}

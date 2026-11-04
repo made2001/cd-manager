@@ -1,0 +1,24 @@
+version: "3.8"
+services:
+  cd-manager:
+    build: .
+    container_name: cd-manager
+    restart: unless-stopped
+    ports:
+      - "8090:8000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    environment:
+      - TZ=Europe/Brussels
+  backup:
+    image: alpine:3.19
+    container_name: cd-manager-backup
+    restart: unless-stopped
+    volumes:
+      - ./data:/data:ro
+      - /volume1/Datas/backup-cd:/backups
+      - ./backup.sh:/backup.sh:ro
+    entrypoint: sh
+    command: -c "echo '0 3 * * * /backup.sh' | crontab - && crond -f"

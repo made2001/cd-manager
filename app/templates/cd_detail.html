@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ cd.artist }} - {{ cd.title }}{% endblock %}
+{% block content %}
+<div class="cd-detail">
+<a href="/collection" class="back-link">← Retour</a>
+<div class="detail-layout">
+<div class="detail-cover">{% if cd.cover_image_path %}<img src="/{{ cd.cover_image_path }}" alt="{{ cd.title }}">{% else %}<div class="cd-placeholder large">🎵</div>{% endif %}</div>
+<div class="detail-info"><h1>{{ cd.title }}</h1><h2>{{ cd.artist }}</h2>
+<table class="info-table">
+<tr><td>Label</td><td>{{ cd.label or "—" }}</td></tr>
+<tr><td>Cat#</td><td>{{ cd.catalog_number or "—" }}</td></tr>
+<tr><td>Année</td><td>{{ cd.year or "—" }}</td></tr>
+<tr><td>Format</td><td>{{ cd.format or "—" }}</td></tr>
+<tr><td>Genre</td><td>{{ cd.genre or "—" }}</td></tr>
+<tr><td>Style</td><td>{{ cd.style or "—" }}</td></tr>
+<tr><td>Condition</td><td>{{ cd.condition or "—" }}</td></tr>
+<tr><td>EAN</td><td>{{ cd.ean or "—" }}</td></tr>
+<tr><td>Prix</td><td>{{ "%.2f"|format(cd.price_paid) if cd.price_paid else "—" }} {{ cd.currency }}</td></tr>
+{% if cd.discogs_url %}<tr><td>Discogs</td><td><a href="{{ cd.discogs_url }}" target="_blank">Voir</a></td></tr>{% endif %}
+</table>
+{% if cd.notes %}<div class="notes"><h3>Notes</h3><p>{{ cd.notes }}</p></div>{% endif %}
+{% if cd.tags %}<div class="tags">{% for tag in cd.tags %}<span class="tag">{{ tag.name }}</span>{% endfor %}</div>{% endif %}
+</div></div>
+{% if cd.tracks %}<div class="tracklist"><h3>Tracklist</h3>
+<table><thead><tr><th>#</th><th>Titre</th><th>Durée</th></tr></thead><tbody>
+{% for track in cd.tracks %}<tr><td>{{ track.position }}</td><td>{{ track.title }}</td><td>{{ track.duration or "" }}</td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+<div class="detail-actions">
+<button hx-post="/cd/{{ cd.id }}/toggle-wantlist" hx-target="#main-content" hx-push-url="true" class="btn btn-secondary">{% if cd.in_wantlist %}← Collection{% else %}→ Envies{% endif %}</button>
+<a href="/cd/{{ cd.id }}/edit" class="btn btn-secondary">Modifier</a>
+<button hx-delete="/cd/{{ cd.id }}" hx-confirm="Supprimer ce support ?" hx-target="#main-content" hx-push-url="true" class="btn btn-danger">Supprimer</button>
+</div></div>
+{% endblock %}

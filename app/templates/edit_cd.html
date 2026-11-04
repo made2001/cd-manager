@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Modifier - {{ cd.title }}{% endblock %}
+{% block content %}
+<div class="add-page"><a href="/cd/{{ cd.id }}" class="back-link">← Retour</a><h1>Modifier</h1>
+<form hx-put="/cd/{{ cd.id }}" hx-target="#main-content" hx-push-url="true" class="cd-form">
+<div class="form-grid">
+<label>Artiste *<input type="text" name="artist" value="{{ cd.artist }}" required></label>
+<label>Titre *<input type="text" name="title" value="{{ cd.title }}" required></label>
+<label>Label<input type="text" name="label" value="{{ cd.label or '' }}"></label>
+<label>Cat#<input type="text" name="catalog_number" value="{{ cd.catalog_number or '' }}"></label>
+<label>Année<input type="number" name="year" value="{{ cd.year or '' }}"></label>
+<label>Format<select name="format">{% for f in ['CD','Vinyle','Cassette','MiniDisc','DVD','Autre'] %}<option value="{{ f }}" {% if cd.format==f %}selected{% endif %}>{{ f }}</option>{% endfor %}</select></label>
+<label>Genre<input type="text" name="genre" value="{{ cd.genre or '' }}"></label>
+<label>Style<input type="text" name="style" value="{{ cd.style or '' }}"></label>
+<label>Condition<input type="text" name="condition" value="{{ cd.condition or '' }}"></label>
+<label>EAN<input type="text" name="ean" value="{{ cd.ean or '' }}"></label>
+<label>Prix<input type="number" name="price_paid" step="0.01" value="{{ cd.price_paid or '' }}"></label>
+</div>
+<label>Notes<textarea name="notes" rows="3">{{ cd.notes or '' }}</textarea></label>
+<button type="submit" class="btn btn-primary">Enregistrer</button>
+</form></div>
+{% endblock %}

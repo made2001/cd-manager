@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Envies - CD Manager{% endblock %}
+{% block content %}
+<div class="collection-page"><h1>Ma Wantlist</h1>
+<div class="cd-grid">
+{% for cd in cds %}
+<div class="cd-card" hx-get="/cd/{{ cd.id }}" hx-target="#main-content" hx-push-url="true" style="cursor:pointer">
+{% if cd.cover_image_path %}<img src="/{{ cd.cover_image_path }}" alt="{{ cd.title }}" loading="lazy">{% else %}<div class="cd-placeholder">🎵</div>{% endif %}
+<div class="cd-info"><strong>{{ cd.artist }}</strong><span>{{ cd.title }}</span><small>{{ cd.year or "?" }} · {{ cd.format or "?" }}</small></div>
+</div>
+{% else %}<p class="empty-state">Ta wantlist est vide.</p>{% endfor %}
+</div></div>
+{% endblock %}

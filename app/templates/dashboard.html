@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - CD Manager{% endblock %}
+{% block content %}
+<div class="dashboard"><h1>Ma Collection</h1>
+<div class="stats-grid">
+<div class="stat-card"><span class="stat-number">{{ total_count }}</span><span class="stat-label">Supports</span></div>
+<div class="stat-card"><span class="stat-number">{{ format_counts.get("CD", 0) }}</span><span class="stat-label">CDs</span></div>
+<div class="stat-card"><span class="stat-number">{{ format_counts.get("Vinyle", 0) }}</span><span class="stat-label">Vinyles</span></div>
+<div class="stat-card"><span class="stat-number">{{ format_counts.get("Cassette", 0) }}</span><span class="stat-label">K7</span></div>
+<div class="stat-card"><span class="stat-number">{{ format_counts.get("MiniDisc", 0) }}</span><span class="stat-label">MiniDiscs</span></div>
+<div class="stat-card"><span class="stat-number">{{ wantlist_count }}</span><span class="stat-label">Envies</span></div>
+</div>
+<h2>Derniers ajoutés</h2>
+<div class="cd-grid">
+{% for cd in recent_cds %}
+<div class="cd-card" hx-get="/cd/{{ cd.id }}" hx-target="#main-content" hx-push-url="true" style="cursor:pointer">
+{% if cd.cover_image_path %}<img src="/{{ cd.cover_image_path }}" alt="{{ cd.title }}" loading="lazy">{% else %}<div class="cd-placeholder">🎵</div>{% endif %}
+<div class="cd-info"><strong>{{ cd.artist }}</strong><span>{{ cd.title }}</span><small>{{ cd.year or "?" }} · {{ cd.format or "?" }}</small></div>
+</div>
+{% endfor %}
+</div></div>
+{% endblock %}

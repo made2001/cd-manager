@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}CD Manager{% endblock %}</title>
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<nav class="navbar">
+<a href="/" class="nav-brand">🎵 CD Manager</a>
+<div class="nav-links">
+<a href="/collection" hx-get="/collection" hx-target="#main-content" hx-push-url="true">Collection</a>
+<a href="/wantlist" hx-get="/wantlist" hx-target="#main-content" hx-push-url="true">Envies</a>
+<a href="/add" hx-get="/add" hx-target="#main-content" hx-push-url="true">Ajouter</a>
+<a href="/scan">Scanner</a>
+<a href="/import/discogs" hx-get="/import/discogs" hx-target="#main-content" hx-push-url="true">Import Discogs</a>
+<a href="/export/csv" class="nav-btn">Export CSV</a>
+<a href="/export/pdf" class="nav-btn">Export PDF</a>
+<a href="/logout" class="nav-btn">Déconnexion</a>
+</div>
+</nav>
+<main id="main-content">{% block content %}{% endblock %}</main>
+<div id="toast" class="toast hidden"></div>
+<script>
+document.body.addEventListener('htmx:afterSwap',function(e){const t=document.getElementById('toast');if(e.detail.target.dataset.toast){t.textContent=e.detail.target.dataset.toast;t.classList.remove('hidden');setTimeout(()=>t.classList.add('hidden'),3000);}});
+document.body.addEventListener('htmx:confirm',function(e){if(e.detail.question){e.detail.issueRequest(window.confirm(e.detail.question));}});
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<p class="results-count">{{ total_count }} support{{ 's' if total_count != 1 else '' }}
+{% if total_pages > 1 %} · page {{ page }}/{{ total_pages }}{% endif %}</p>
+<div class="cd-grid">
+{% for cd in cds %}
+<div class="cd-card" hx-get="/cd/{{ cd.id }}" hx-target="#main-content" hx-push-url="true" style="cursor:pointer">
+{% if cd.cover_image_path %}<img src="/{{ cd.cover_image_path }}" alt="{{ cd.title }}" loading="lazy">{% else %}<div class="cd-placeholder">🎵</div>{% endif %}
+<div class="cd-info"><strong>{{ cd.artist }}</strong><span>{{ cd.title }}</span><small>{{ cd.year or "?" }} · {{ cd.format or "?" }}</small></div>
+</div>
+{% else %}<p class="empty-state">Aucun résultat.</p>{% endfor %}
+</div>
+{% if total_pages > 1 %}
+<div class="pagination">
+{% if page > 1 %}<button class="btn btn-secondary" hx-get="/collection?page={{ page-1 }}" hx-target="#collection-results" hx-push-url="true" hx-include="#collection-filters">← Précédent</button>{% endif %}
+<span>Page {{ page }} / {{ total_pages }}</span>
+{% if page < total_pages %}<button class="btn btn-secondary" hx-get="/collection?page={{ page+1 }}" hx-target="#collection-results" hx-push-url="true" hx-include="#collection-filters">Suivant →</button>{% endif %}
+</div>
+{% endif %}
