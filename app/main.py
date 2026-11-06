@@ -4,15 +4,22 @@ from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 from contextlib import asynccontextmanager
 from sqlalchemy import func, select
+import bcrypt
 from app.database import engine, Base, async_session
 from app.config import settings
-from app.models import CD
-from app.routers import auth_routes, collection, import_discogs, lookup, search, export, export_pdf
+from app.models import CD, Setting
+from app.routers import auth_routes, collection, import_discogs, lookup, search, export, export_pdf, profile
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+    async with async_session() as db:
+        existing = (await db.execute(select(Setting).where(Setting.key == "password_hash"))).scalar_one_or_none()
+        if not existing:
+            h = bcrypt.hashpw(settings.admin_password.encode(), bcrypt.gensalt()).decode()
+            db.add(Setting(key="password_hash", value=h))
+            await db.commit()
     yield
 
 app = FastAPI(title="CD Manager", lifespan=lifespan)
@@ -28,6 +35,7 @@ app.include_router(lookup.router)
 app.include_router(search.router)
 app.include_router(export.router)
 app.include_router(export_pdf.router)
+app.include_router(profile.router)
 
 @app.get("/")
 async def root(request: Request):

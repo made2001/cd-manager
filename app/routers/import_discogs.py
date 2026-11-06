@@ -21,6 +21,29 @@ def _notes_to_str(notes):
         return " | ".join(parts) or None
     return str(notes)
 
+def _detect_format(formats):
+    import re
+    names = []
+    for f in formats or []:
+        if isinstance(f, dict):
+            name = (f.get("name") or "").lower()
+            descs = " ".join(str(d).lower() for d in f.get("descriptions", []))
+            names.append(f"{name} {descs}")
+    blob = " ".join(names)
+    tokens = set(re.findall(r"[a-z0-9]+", blob))
+    if "vinyl" in tokens or "lp" in tokens or '12"' in blob or '7"' in blob:
+        return "Vinyle"
+    if "cassette" in tokens or "cass" in tokens:
+        return "Cassette"
+    if "minidisc" in tokens or ("mini" in tokens and "disc" in tokens):
+        return "MiniDisc"
+    if "cd" in tokens or "cdp" in tokens:
+        return "CD"
+    if "dvd" in tokens:
+        return "DVD"
+    return "CD"
+
+
 @router.get("/discogs", response_class=HTMLResponse)
 async def import_page(request: Request):
     require_auth(request)
@@ -50,15 +73,7 @@ async def import_collection(username: str, request: Request, db: AsyncSession = 
             details = await get_release(release_id)
             cover_url = details["images"][0].get("resource_url", "") if details.get("images") else ""
             cover_path = await download_cover(cover_url)
-            formats = details.get("formats", [])
-            main_format = "CD"
-            for f in formats:
-                if "Vinyl" in f or "LP" in f:
-                    main_format = "Vinyle"; break
-                elif "Cassette" in f:
-                    main_format = "Cassette"; break
-                elif "MiniDisc" in f or "MD" in f:
-                    main_format = "MiniDisc"; break
+            main_format = _detect_format(details.get("formats", []))
             cd = CD(
                 discogs_release_id=release_id,
                 title=details.get("title", "Unknown"),

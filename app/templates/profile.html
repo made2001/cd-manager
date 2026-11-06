@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Profil - CD Manager{% endblock %}
+{% block content %}
+<div class="add-page" style="max-width:480px;margin:0 auto">
+<h1>👤 Profil</h1>
+{% if msg %}<p style="color:#22c55e">{{ msg }}</p>{% endif %}
+{% if err %}<p class="error">{{ err }}</p>{% endif %}
+<h2>Changer le mot de passe</h2>
+<form method="POST" action="/profile/password" style="display:flex;flex-direction:column;gap:.8rem">
+    <label>Mot de passe actuel<input type="password" name="current" required></label>
+    <label>Nouveau mot de passe<input type="password" name="new" required minlength="6"></label>
+    <label>Confirmer le nouveau mot de passe<input type="password" name="confirm" required></label>
+    <button type="submit" class="btn btn-primary">Enregistrer</button>
+</form>
+</div>
+{% endblock %}
