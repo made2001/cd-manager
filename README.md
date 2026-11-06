@@ -3,7 +3,7 @@
 Application web auto-hebergée pour gerer une collection de supports physiques
 (CD, vinyles, cassettes, MiniDisc). Pensée pour tourner sur un NAS, en mono-utilisateur.
 
-> Demo : https://cd.dechamps.eu
+
 
 ## Fonctionnalites
 - Import Discogs : import complet et idempotent (pas de doublons).
