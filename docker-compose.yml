@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   cd-manager:
     build: .
@@ -12,6 +11,11 @@ services:
       - .env
     environment:
       - TZ=Europe/Brussels
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
   backup:
     image: alpine:3.19
     container_name: cd-manager-backup

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import RedirectResponse
 from app.auth import require_auth
 from fastapi.staticfiles import StaticFiles
@@ -24,8 +24,8 @@ async def lifespan(app: FastAPI):
             await db.commit()
     yield
 
-app = FastAPI(title="CD Manager", lifespan=lifespan)
-app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
+app = FastAPI(title="CD Manager", lifespan=lifespan, docs_url=None, openapi_url=None)
+app.add_middleware(SessionMiddleware, secret_key=settings.secret_key, https_only=True)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.mount("/covers", StaticFiles(directory=settings.covers_path), name="covers")
 app.state.templates = Jinja2Templates(directory="app/templates")
@@ -33,11 +33,14 @@ app.state.templates = Jinja2Templates(directory="app/templates")
 app.include_router(auth_routes.router)
 app.include_router(collection.router)
 app.include_router(import_discogs.router)
-app.include_router(lookup.router)
+app.include_router(lookup.router, dependencies=[Depends(require_auth)])
 app.include_router(search.router)
-app.include_router(export.router)
-app.include_router(export_pdf.router)
+app.include_router(export.router, dependencies=[Depends(require_auth)])
+app.include_router(export_pdf.router, dependencies=[Depends(require_auth)])
 app.include_router(profile.router)
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
 @app.exception_handler(401)
 async def auth_redirect(request: Request, exc):
     return RedirectResponse(url="/login", status_code=303)

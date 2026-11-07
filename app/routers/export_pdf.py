@@ -13,6 +13,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from app.database import get_db
 from app.models import CD
 from app.config import settings
+from xml.sax.saxutils import escape as esc
 
 router = APIRouter(prefix="/export", tags=["export"])
 COL_WIDTHS = [30 * mm, 50 * mm, 55 * mm, 15 * mm, 20 * mm]
@@ -41,8 +42,8 @@ async def export_pdf(db: AsyncSession = Depends(get_db)):
     rows = [["", "Artiste", "Titre", "Année", "Format"]]
     for cd in cds:
         cover = _resize_cover(cd.cover_image_path) if cd.cover_image_path else ""
-        rows.append([cover, Paragraph(cd.artist, cell_style), Paragraph(cd.title, cell_style),
-                     Paragraph(str(cd.year or ""), cell_style), Paragraph(cd.format or "", cell_style)])
+        rows.append([cover, Paragraph(esc(cd.artist), cell_style), Paragraph(esc(cd.title), cell_style),
+                     Paragraph(esc(str(cd.year or "")), cell_style), Paragraph(esc(cd.format or ""), cell_style)])
     table = Table(rows, colWidths=COL_WIDTHS, repeatRows=1)
     table.setStyle(TableStyle([
         ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#6366f1")),

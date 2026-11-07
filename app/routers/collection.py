@@ -9,8 +9,23 @@ from app.models import CD, Track
 from app.services.image_downloader import download_cover
 from app.services.discogs_client import get_release, search_by_barcode
 from app.services.musicbrainz_client import lookup_by_barcode, get_release_details
+from app.routers.import_discogs import _detect_format
 
 router = APIRouter(tags=["collection"])
+
+
+def _safe_int(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _safe_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 async def get_cd_with_relations(db, cd_id):
     result = await db.execute(
@@ -94,8 +109,8 @@ async def create_cd(request: Request, db: AsyncSession = Depends(get_db),
     ean: str = Form(None), price_paid: str = Form(None), currency: str = Form("EUR"), notes: str = Form(None)):
     require_auth(request)
     cd = CD(artist=artist, title=title, label=label, catalog_number=catalog_number,
-            year=int(year) if year else None, format=format, genre=genre, style=style,
-            condition=condition, ean=ean, price_paid=float(price_paid) if price_paid else None,
+            year=_safe_int(year), format=format, genre=genre, style=style,
+            condition=condition, ean=ean, price_paid=_safe_float(price_paid),
             currency=currency, notes=notes)
     db.add(cd); await db.commit(); await db.refresh(cd)
     return RedirectResponse(f"/cd/{cd.id}", status_code=303)
@@ -111,10 +126,10 @@ async def update_cd(cd_id: int, request: Request, db: AsyncSession = Depends(get
     if not cd:
         return HTMLResponse("Support introuvable", status_code=404)
     cd.artist, cd.title, cd.label, cd.catalog_number = artist, title, label, catalog_number
-    cd.year = int(year) if year else None
+    cd.year = _safe_int(year)
     cd.format, cd.genre, cd.style = format, genre, style
     cd.condition, cd.ean = condition, ean
-    cd.price_paid = float(price_paid) if price_paid else None
+    cd.price_paid = _safe_float(price_paid)
     cd.currency, cd.notes = currency, notes
     await db.commit()
     return RedirectResponse(f"/cd/{cd.id}", status_code=303)
@@ -134,7 +149,7 @@ async def toggle_wantlist(cd_id: int, request: Request, db: AsyncSession = Depen
     if cd:
         cd.in_wantlist = 0 if cd.in_wantlist else 1
         await db.commit()
-    return RedirectResponse(f"/cd/{cd.id}", status_code=303)
+    return RedirectResponse(f"/cd/{cd.id}" if cd else "/collection", status_code=303)
 
 @router.post("/cd/add-from-lookup/{ean}")
 async def add_from_lookup(ean: str, request: Request, db: AsyncSession = Depends(get_db)):
@@ -147,7 +162,7 @@ async def add_from_lookup(ean: str, request: Request, db: AsyncSession = Depends
         cd = CD(title=details.get("title", ""),
                 artist=details.get("artist-credit", [{}])[0].get("name", "") if details.get("artist-credit") else "",
                 label=details.get("label-info", [{}])[0].get("label", {}).get("name", "") if details.get("label-info") else "",
-                year=int(details.get("date", "")[:4]) if details.get("date") else None,
+                year=_safe_int(details.get("date", "")[:4]),
                 format="CD", ean=ean, cover_image_path=await download_cover(caa_url))
         db.add(cd); await db.flush()
         for medium in details.get("media", []):
@@ -167,7 +182,7 @@ async def add_from_lookup(ean: str, request: Request, db: AsyncSession = Depends
                 artist=details.get("artists", [{}])[0].get("name", "") if details.get("artists") else "",
                 label=details.get("labels", [{}])[0].get("name", "") if details.get("labels") else "",
                 catalog_number=details.get("labels", [{}])[0].get("cat_no", "") if details.get("labels") else "",
-                year=details.get("year"), format=", ".join(details.get("formats", [])),
+                year=details.get("year"), format=_detect_format(details.get("formats", [])),
                 genre=", ".join(details.get("genres", [])), style=", ".join(details.get("styles", [])),
                 ean=ean, discogs_url=details.get("uri", ""), cover_image_path=await download_cover(cover_url))
         db.add(cd); await db.flush()
