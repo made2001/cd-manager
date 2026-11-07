@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 BACKUP_DIR="/backups"
 DATE=$(date +%Y%m%d_%H%M%S)
 RETENTION_DAYS=30
