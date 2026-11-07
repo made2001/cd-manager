@@ -12,14 +12,14 @@ def _headers():
 async def get_user_collection(username, page=1, per_page=100):
     url = f"{DISCOGS_API}/users/{username}/collection/folders/0/releases"
     params = {"page": page, "per_page": per_page}
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
         resp = await client.get(url, params=params, headers=_headers())
         resp.raise_for_status()
         return resp.json()
 
 async def get_release(release_id):
     url = f"{DISCOGS_API}/releases/{release_id}"
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
         resp = await client.get(url, headers=_headers())
         resp.raise_for_status()
         return resp.json()
@@ -27,7 +27,7 @@ async def get_release(release_id):
 async def search_by_barcode(barcode):
     url = f"{DISCOGS_API}/database/search"
     params = {"barcode": barcode, "type": "release"}
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
         resp = await client.get(url, params=params, headers=_headers())
         resp.raise_for_status()
         return resp.json()

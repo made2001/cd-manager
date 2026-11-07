@@ -1,3 +1,4 @@
+import httpx
 from fastapi import APIRouter
 from app.services.discogs_client import search_by_barcode, get_release
 from app.services.musicbrainz_client import lookup_by_barcode, get_release_details
@@ -7,11 +8,18 @@ router = APIRouter(prefix="/lookup", tags=["lookup"])
 
 @router.get("/ean/{ean}")
 async def lookup_ean(ean: str):
+    try:
+        return await _lookup_ean(ean)
+    except (httpx.HTTPError, ValueError):
+        return {"error": "Service indisponible, reessayez"}
+
+async def _lookup_ean(ean: str):
     mb_result = await lookup_by_barcode(ean)
     releases = mb_result.get("releases", [])
     if releases:
-        details = await get_release_details(releases[0]["id"])
-        caa_url = f"https://coverartarchive.org/release/{releases[0]['id']}/front"
+        release_id = releases[0]["id"]
+        details = await get_release_details(release_id)
+        caa_url = f"https://coverartarchive.org/release/{release_id}/front"
         cover_path = await download_cover(caa_url)
         tracks = []
         for medium in details.get("media", []):
@@ -44,4 +52,4 @@ async def lookup_ean(ean: str):
             "label": details.get("labels", [{}])[0].get("name", "") if details.get("labels") else "",
             "year": details.get("year"), "ean": ean, "tracks": tracks, "cover_path": cover_path,
         }
-    return {"error": "Aucun résultat trouvé pour cet EAN"}
+    return {"error": "Aucun resultat trouve pour cet EAN"}
