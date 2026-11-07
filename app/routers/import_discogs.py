@@ -54,6 +54,7 @@ async def import_collection(username: str, request: Request, db: AsyncSession = 
     require_auth(request)
     imported = 0
     skipped = 0
+    existing_ids = set((await db.execute(select(CD.discogs_release_id))).scalars().all())
     page = 1
     while True:
         data = await get_user_collection(username, page=page)
@@ -65,8 +66,7 @@ async def import_collection(username: str, request: Request, db: AsyncSession = 
             if not bi or "id" not in bi:
                 continue
             release_id = bi["id"]
-            existing = await db.execute(select(CD).where(CD.discogs_release_id == release_id))
-            if existing.scalar_one_or_none():
+            if release_id in existing_ids:
                 skipped += 1
                 continue
             await asyncio.sleep(1.1)
@@ -93,6 +93,7 @@ async def import_collection(username: str, request: Request, db: AsyncSession = 
             for track in details.get("tracklist", []):
                 db.add(Track(cd_id=cd.id, position=track.get("position", ""),
                              title=track.get("title", ""), duration=track.get("duration", "")))
+            existing_ids.add(release_id)
             imported += 1
         await db.commit()
         pagination = data.get("pagination", {})
