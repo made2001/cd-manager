@@ -1,4 +1,6 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
+from app.auth import require_auth
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -36,9 +38,12 @@ app.include_router(search.router)
 app.include_router(export.router)
 app.include_router(export_pdf.router)
 app.include_router(profile.router)
-
+@app.exception_handler(401)
+async def auth_redirect(request: Request, exc):
+    return RedirectResponse(url="/login", status_code=303)
 @app.get("/")
 async def root(request: Request):
+    require_auth(request)
     async with async_session() as db:
         total = (await db.execute(select(func.count()).select_from(CD).where(CD.in_wantlist == 0))).scalar() or 0
         wantlist = (await db.execute(select(func.count()).select_from(CD).where(CD.in_wantlist == 1))).scalar() or 0
