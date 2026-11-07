@@ -31,7 +31,7 @@ async def scan_page(request: Request):
 async def list_collection(request: Request, db: AsyncSession = Depends(get_db),
     q: str = Query(None), format: str = Query(None), genre: str = Query(None),
     artist: str = Query(None), artist_q: str = Query(None),
-    sort: str = Query("date_desc"), page: int = Query(1, ge=1), per_page: int = Query(24)):
+    sort: str = Query("artist_asc"), page: int = Query(1, ge=1), per_page: int = Query(24)):
     require_auth(request)
     if per_page not in (24, 48, 96, 192):
         per_page = 24
@@ -54,7 +54,7 @@ async def list_collection(request: Request, db: AsyncSession = Depends(get_db),
                 "artist_asc": asc(CD.artist_sort), "artist_desc": desc(CD.artist_sort),
                 "year_desc": desc(CD.year), "year_asc": asc(CD.year),
                 "title_asc": asc(CD.title_sort), "title_desc": desc(CD.title_sort)}
-    query = query.order_by(sort_map.get(sort, desc(CD.date_added)))
+    query = query.order_by(sort_map.get(sort, asc(CD.artist_sort)))
     total = (await db.execute(count_query)).scalar() or 0
     total_pages = max(1, (total + per_page - 1) // per_page)
     page = min(page, total_pages)
