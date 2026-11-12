@@ -55,7 +55,7 @@ async def list_collection(request: Request, db: AsyncSession = Depends(get_db),
     if q:
         like = f"%{q}%"
         condition = or_(CD.title.ilike(like), CD.artist.ilike(like), CD.label.ilike(like),
-                        CD.catalog_number.ilike(like), CD.ean.ilike(like))
+                        CD.catalog_number.ilike(like), CD.ean.ilike(like), CD.notes.ilike(like))
         query = query.where(condition); count_query = count_query.where(condition)
     if format:
         query = query.where(CD.format == format); count_query = count_query.where(CD.format == format)
