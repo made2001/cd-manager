@@ -68,10 +68,10 @@ async def list_collection(request: Request, db: AsyncSession = Depends(get_db),
     if artist_q:
         query = query.where(CD.artist.ilike(f"%{artist_q}%")); count_query = count_query.where(CD.artist.ilike(f"%{artist_q}%"))
     sort_map = {"date_desc": desc(CD.date_added), "date_asc": asc(CD.date_added),
-                "artist_asc": asc(CD.artist_sort), "artist_desc": desc(CD.artist_sort),
+                "artist_asc": asc(func.lower(CD.artist)), "artist_desc": desc(func.lower(CD.artist)),
                 "year_desc": desc(CD.year), "year_asc": asc(CD.year),
-                "title_asc": asc(CD.title_sort), "title_desc": desc(CD.title_sort)}
-    query = query.order_by(sort_map.get(sort, asc(CD.artist_sort)))
+                "title_asc": asc(func.lower(CD.title)), "title_desc": desc(func.lower(CD.title))}
+    query = query.order_by(sort_map.get(sort, asc(func.lower(CD.artist))))
     total = (await db.execute(count_query)).scalar() or 0
     total_pages = max(1, (total + per_page - 1) // per_page)
     page = min(page, total_pages)
