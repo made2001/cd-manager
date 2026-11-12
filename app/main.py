@@ -25,6 +25,14 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="CD Manager", lifespan=lifespan, docs_url=None, openapi_url=None)
+
+@app.middleware("http")
+async def security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "same-origin"
+    return response
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key, https_only=True)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 app.mount("/covers", StaticFiles(directory=settings.covers_path), name="covers")
