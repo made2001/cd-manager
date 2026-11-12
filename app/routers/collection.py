@@ -1,3 +1,5 @@
+import httpx
+import httpx
 from fastapi import APIRouter, Depends, Request, Query, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -153,6 +155,13 @@ async def toggle_wantlist(cd_id: int, request: Request, db: AsyncSession = Depen
 
 @router.post("/cd/add-from-lookup/{ean}")
 async def add_from_lookup(ean: str, request: Request, db: AsyncSession = Depends(get_db)):
+    require_auth(request)
+    try:
+        return await _add_from_lookup(ean, request, db)
+    except (httpx.HTTPError, ValueError):
+        return HTMLResponse("<p>Service indisponible, reessayez.</p><p><a href=\"/add\">Retour</a></p>", status_code=503)
+
+async def _add_from_lookup(ean: str, request: Request, db: AsyncSession = Depends(get_db)):
     require_auth(request)
     mb_result = await lookup_by_barcode(ean)
     releases = mb_result.get("releases", [])
