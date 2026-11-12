@@ -24,5 +24,6 @@ services:
       - ./data:/data:ro
       - /volume1/Datas/backup-cd:/backups
       - ./backup.sh:/backup.sh:ro
+      - ./backup-entrypoint.sh:/entrypoint.sh:ro
     entrypoint: sh
-    command: -c "echo '0 3 * * * /backup.sh' | crontab - && crond -f"
+    command: /entrypoint.sh
