@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ cd.title }}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<main id="main-content"><div class="cd-detail">
+<a href="/public" class="back-link">← Collection</a>
+<div class="detail-layout">
+<div class="detail-cover">{% if cd.cover_image_path %}<img src="/{{ cd.cover_image_path }}" alt="{{ cd.title }}">{% else %}<div class="cd-placeholder large">🎵</div>{% endif %}</div>
+<div class="detail-info"><h1>{{ cd.title }}</h1><h2>{{ cd.artist }}</h2>
+<table class="info-table">
+<tr><td>Label</td><td>{{ cd.label or "—" }}</td></tr>
+<tr><td>Année</td><td>{{ cd.year or "—" }}</td></tr>
+<tr><td>Format</td><td>{{ cd.format or "—" }}</td></tr>
+<tr><td>Genre</td><td>{{ cd.genre or "—" }}</td></tr>
+</table>
+</div></div>
+{% if cd.tracks %}<div class="tracklist"><h3>Tracklist</h3>
+<table><thead><tr><th>#</th><th>Titre</th><th>Durée</th></tr></thead><tbody>
+{% for track in cd.tracks %}<tr><td>{{ track.position }}</td><td>{{ track.title }}</td><td>{{ track.duration or "" }}</td></tr>{% endfor %}
+</tbody></table></div>{% endif %}
+</div></main>
+</body>
+</html>

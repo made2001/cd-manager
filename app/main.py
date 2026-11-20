@@ -10,7 +10,7 @@ import bcrypt
 from app.database import engine, Base, async_session
 from app.config import settings
 from app.models import CD, Setting
-from app.routers import auth_routes, collection, import_discogs, lookup, search, export, export_pdf, profile
+from app.routers import auth_routes, collection, import_discogs, lookup, search, export, export_pdf, profile, public
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -46,6 +46,7 @@ app.include_router(search.router)
 app.include_router(export.router, dependencies=[Depends(require_auth)])
 app.include_router(export_pdf.router, dependencies=[Depends(require_auth)])
 app.include_router(profile.router)
+app.include_router(public.router)
 @app.get("/health")
 async def health():
     return {"status": "ok"}

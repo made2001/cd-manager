@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collection</title>
+<script src="/static/js/htmx.min.js"></script>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<main id="main-content"><div class="collection-page">
+<h1>🎵 Collection</h1>
+<div class="filters">
+    <input type="text" name="q" placeholder="Recherche (titre, artiste, label...)" hx-get="/public" hx-trigger="keyup changed delay:300ms" hx-target="#public-results" hx-push-url="true" value="{{ query or "" }}">
+    <select name="format" hx-get="/public" hx-trigger="change" hx-target="#public-results" hx-push-url="true">
+        <option value="">Tous formats</option>
+        <option value="CD" {% if format_filter=="CD" %}selected{% endif %}>CD</option>
+        <option value="Vinyle" {% if format_filter=="Vinyle" %}selected{% endif %}>Vinyle</option>
+        <option value="Cassette" {% if format_filter=="Cassette" %}selected{% endif %}>K7</option>
+        <option value="MiniDisc" {% if format_filter=="MiniDisc" %}selected{% endif %}>MiniDisc</option>
+    </select>
+    <select name="sort" hx-get="/public" hx-trigger="change" hx-target="#public-results" hx-push-url="true">
+        <option value="artist_asc" {% if sort=="artist_asc" %}selected{% endif %}>Artiste A-Z</option>
+        <option value="artist_desc" {% if sort=="artist_desc" %}selected{% endif %}>Artiste Z-A</option>
+        <option value="title_asc" {% if sort=="title_asc" %}selected{% endif %}>Titre A-Z</option>
+        <option value="year_desc" {% if sort=="year_desc" %}selected{% endif %}>Année ↓</option>
+    </select>
+    <select name="per_page" hx-get="/public" hx-trigger="change" hx-target="#public-results" hx-push-url="true">
+        <option value="24" {% if per_page==24 %}selected{% endif %}>24/page</option>
+        <option value="48" {% if per_page==48 %}selected{% endif %}>48/page</option>
+        <option value="96" {% if per_page==96 %}selected{% endif %}>96/page</option>
+    </select>
+</div>
+<div id="public-results">{% include "partials/public_grid.html" %}</div>
+</div></main>
+</body>
+</html>
